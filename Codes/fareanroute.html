@@ -1,0 +1,136 @@
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type"content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+<link rel="stylesheet"type="text/css"href="css/fare.css"/>
+<script type="text/javascript"src="jquery/jquery-2.0.2.js"></script>
+<script src="http://maps.google.com/maps/api/js?sensor=false"type="text/javascript"></script>
+<script type="text/javascript">
+var map;
+var count1=0;
+$(document).ready(function(){
+ $('#find').click(function ()
+ {
+document.getElementById("stationsHiddenDiv").innerHTML = "";
+document.getElementById("map").innerHTML = "";
+$.ajax({
+	type: "post",
+	url: "getStationsForMapAjax.jsp", //this is my servlet
+	data:"s_stationid="+$('#s_station').val()+"&d_stationid="+$('#d_station'
+	).val(),
+	success: function(msg){
+	 $("#stationsHiddenDiv").append(msg);
+	count1=$('#count1').val();
+	draw();
+	//document.getElementById("station").value="";
+	//document.getElementById("latitude").value="";
+	//document.getElementById("longitude").value="";
+	 }
+	 });
+	 });//end of click function
+	 $.ajax({
+	type: "post",
+	url: "admin/stationSelectAjax.jsp",
+	data:"",
+	success: function(msg){
+	//alert(msg);
+	 $("#s_station").append(msg);
+	document.getElementById("s_station").selectedIndex = -1;
+	 $("#d_station").append(msg);
+	document.getElementById("d_station").selectedIndex = -1;
+	 }
+	 });
+	});
+	function draw(){
+	var locations = new Array(count1);
+	for (var k=0;k<count1; k++)
+	 {
+	locations[k] = new Array(3);
+	for(var m=0,j=1;m<count1;m++,j++)
+	{
+	locations[m][0]=document.getElementById('stname'+j).value;
+	locations[m][1]=document.getElementById('latitude'+j).value;
+	locations[m][2]=document.getElementById('longitude'+j).value;
+	//alert(locations[m][0]+","+locations[m][1]+","+locations[m][2]);
+	}
+	map = newgoogle.maps.Map(document.getElementById('map'), {
+	zoom: 11,
+	center: newgoogle.maps.LatLng(10.04754, 76.31846),
+	mapTypeId: google.maps.MapTypeId.ROADMAP
+	 });
+	var infowindow = newgoogle.maps.InfoWindow();
+	var marker, i;
+	for (i = 0; i < count1; i++) {
+	marker = newgoogle.maps.Marker({
+	position: newgoogle.maps.LatLng(locations[i][1], locations[i][2]),
+	map: map
+	 });
+	google.maps.event.addListener(marker, 'click', (function(marker, i) {
+	return function() {
+	infowindow.setContent(locations[i][0]);
+	infowindow.open(map, marker);
+	}
+	})(marker, i));
+}
+ }
+	
+	</script>
+	<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js">
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap">
+    </script>
+	</head>
+	<body>
+	<div class="fairTable">
+	<form id="fairTableForm"method="post"action="">
+	<table>
+<tr>
+<th height="35"align="center"colspan="2">
+<p>Find fair and route between two stations.
+</p>
+</th>
+</tr>
+<tr>
+<td height="35"align="left">
+<p>Source </p>
+</td>
+<td align="left">
+<p><select class="s_station"name="s_station"id="s_station">
+<option> Dasrahalli</option>
+<option> Jalahalli</option>
+<option> Peenya</option>
+<option> Sandalsoap</option>
+<option> Yesvantpur</option>
+</select></p>
+</td>
+</tr>
+<tr>
+<td height="35"align="left">
+<p>Destination</p>
+</td>
+<td width="50%"align="left">
+<p><select class="d_station"name="d_station"id="d_station">
+<option> Dasrahalli</option>
+<option> Jalahalli</option>
+<option> Peenya</option>
+<option> Sandalsoap</option>
+<option> Yesvantpur</option>
+</select></p>
+</td>
+</tr>
+<tr>
+<td colspan=2 align ="center">
+<input type="button"value="Find"id="find"/>
+</td>
+</tr>
+</table>
+</form>
+<div id="stationsHiddenDiv" name="stationsHiddenDiv">
+</div>
+<div id="map"style="width: 500px; height: 400px;"></div>
+</div>
+</body>
+</html>
